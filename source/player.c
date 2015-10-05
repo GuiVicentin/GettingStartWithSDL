@@ -18,7 +18,9 @@ Player* createPlayer (float px, float py)
     new_player->m_rect.h = 100.0f;
     new_player->m_dx = 0.0f;
     new_player->m_dy = 0.0f;
+    
     new_player->isOnGround = false;
+    new_player->hasJump = false;
     
     return new_player;
 }

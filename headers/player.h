@@ -21,6 +21,7 @@ typedef struct player
     float m_dx, m_dy;
     
     Boolean isOnGround;
+    Boolean hasJump;
     
 } Player;
 

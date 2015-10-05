@@ -14,7 +14,7 @@ Game* initGame (void)
     
     SDL_Init(SDL_INIT_EVERYTHING);
     
-    new_game->m_window = SDL_CreateWindow("First Game", 100, 100, 1024, 768, 0);
+    new_game->m_window = SDL_CreateWindow("First Game", 100, 100, 640, 480, 0);
     if (new_game->m_window == NULL)
     {
         printf("Nao foi possivel criar uma janela!\n");
@@ -53,10 +53,10 @@ void closeGame (Game* pGame)
 void loadGameContext (Game* pGame)
 {
     //inicializando player
-    pGame->player = createPlayer(300.0f, 220.0f);
+    pGame->player = createPlayer(300.0f, 0.0f);
     
     //inicializando chao
-    pGame->ground = createRectangle(0, 728, 1024, 40);
+    pGame->ground = createRectangle(0, 440, 640, 40);
 }
 
 void handleEvents (Game* pGame)
@@ -74,7 +74,15 @@ void handleEvents (Game* pGame)
                 switch (event.key.keysym.sym)
                 {
                     case SDLK_UP:
-                        pGame->player->m_rect.y -= 150.0f;
+                        if(pGame->player->hasJump)
+                        {
+                            pGame->player->m_dy -= 300.0f;
+                            pGame->player->hasJump = false;
+                        }
+                        break;
+                        
+                    case SDLK_ESCAPE:
+                        pGame->isRunning = false;
                         break;
                         
                     default:
@@ -137,6 +145,7 @@ void updateGame (Game* pGame)
     {
         pGame->player->isOnGround = true;
         pGame->player->m_rect.y = pGame->ground->y - pGame->player->m_rect.h;
+        pGame->player->hasJump = true;
     }
     else
     {
