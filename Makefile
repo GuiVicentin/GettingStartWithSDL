@@ -3,14 +3,16 @@ INCLUDES = ./headers
 LIBRARIES = -lSDL2
 FLAGS = -W
 
-compile:
-	$(CC) -o binary ./source/main.c -I $(INCLUDES) $(LIBRARIES) $(FLAGS)
+all: clean compile run
+
+compile: game.o player.o
+	$(CC) -o binary ./source/main.c game.o player.o -I $(INCLUDES) $(LIBRARIES) $(FLAGS)
 
 game.o:
-	gcc -c ./source/game.c
+	gcc -c ./source/game.c -I $(INCLUDES)
 
 player.o:
-	gcc -c ./source/player.c
+	gcc -c ./source/player.c -I $(INCLUDES)
 
 clean:
 	rm *o binary

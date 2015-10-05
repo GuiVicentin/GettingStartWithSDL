@@ -14,7 +14,7 @@ Game* initGame (void)
     
     SDL_Init(SDL_INIT_EVERYTHING);
     
-    new_game->m_window = SDL_CreateWindow("First Game", 100, 100, 640, 480, 0);
+    new_game->m_window = SDL_CreateWindow("First Game", 100, 100, 1024, 768, 0);
     if (new_game->m_window == NULL)
     {
         printf("Nao foi possivel criar uma janela!\n");
@@ -56,7 +56,7 @@ void loadGameContext (Game* pGame)
     pGame->player = createPlayer(300.0f, 220.0f);
     
     //inicializando chao
-    pGame->ground = createRectangle(0, 440, 640, 40);
+    pGame->ground = createRectangle(0, 728, 1024, 40);
 }
 
 void handleEvents (Game* pGame)
@@ -90,13 +90,13 @@ void handleEvents (Game* pGame)
     const Uint8* keys = SDL_GetKeyboardState(NULL);
     if (keys[SDL_SCANCODE_RIGHT])
     {
-        if (pGame->player->m_dx < 200.0f)
-            pGame->player->m_dx += 20.0f;
+        if (pGame->player->m_dx < 300.0f)
+            pGame->player->m_dx += 30.0f;
     }
     if (keys[SDL_SCANCODE_LEFT])
     {
-        if (pGame->player->m_dx > -200.0f)
-            pGame->player->m_dx -= 20.0f;
+        if (pGame->player->m_dx > -300.0f)
+            pGame->player->m_dx -= 30.0f;
     }
 }
 
@@ -105,6 +105,7 @@ void updateGame (Game* pGame)
     static int thisTime = 0;
     static int lastTime = 0;
     static float deltaTime = 0.0f;
+	static float timeCounter = 0.0f;
     
     thisTime = SDL_GetTicks();
     deltaTime = (float) (thisTime - lastTime) / 1000;
@@ -115,16 +116,16 @@ void updateGame (Game* pGame)
     
     if (pGame->player->m_dx > 0.0f)
     {
-        pGame->player->m_dx -= 5.0f;
+        pGame->player->m_dx -= 500.0f * deltaTime;
     }
     if (pGame->player->m_dx < 0.0f)
     {
-        pGame->player->m_dx += 5.0f;
+        pGame->player->m_dx += 500.0f * deltaTime;
     }
     
     if (!pGame->player->isOnGround)
     {
-        pGame->player->m_dy += 5.0f;
+        pGame->player->m_dy += 500.0f * deltaTime;
     }
     else
     {
@@ -135,11 +136,21 @@ void updateGame (Game* pGame)
     if (checkBoxCollision(&pGame->player->m_rect, pGame->ground))
     {
         pGame->player->isOnGround = true;
+        pGame->player->m_rect.y = pGame->ground->y - pGame->player->m_rect.h;
     }
     else
     {
         pGame->player->isOnGround = false;
     }
+
+    if (timeCounter >= 2.0f)
+    {
+        printf("FPS: %.2f\n", (1 / deltaTime));
+        printf("SpeedX: %.2f SpeedY: %.2f\n", pGame->player->m_dx, pGame->player->m_dy);
+        timeCounter = 0.0f;
+    }
+
+    timeCounter += deltaTime;
 }
 
 void renderGame (Game* pGame)
@@ -161,16 +172,16 @@ void renderGame (Game* pGame)
 
 Boolean checkBoxCollision (SDL_Rect* pRect1, SDL_Rect* pRect2)
 {
-    if (pRect2->x > pRect1->x + pRect1->w)
+    if (pRect2->x >= pRect1->x + pRect1->w)
         return false;
         
-    if (pRect2->x + pRect2->w < pRect1->x)
+    if (pRect2->x + pRect2->w <= pRect1->x)
         return false;
     
-    if (pRect2->y > pRect1->y + pRect1->h)
+    if (pRect2->y >= pRect1->y + pRect1->h)
         return false;
     
-    if (pRect2->y + pRect2->h < pRect1->y)
+    if (pRect2->y + pRect2->h <= pRect1->y)
         return false;
     
     return true;
