@@ -11,16 +11,22 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <SDL2/SDL.h>
+
+#include "globals.h"
 
 typedef struct player
 {
-    float m_x, m_y;
-    float m_width, m_height;
+    SDL_Rect m_rect;
     float m_dx, m_dy;
+    
+    Boolean isOnGround;
     
 } Player;
 
 Player* createPlayer (float px, float py);
 void destroyPlayer (Player* pPlayer);
+
+SDL_Rect* createRectangle(int px, int py, int pw, int ph);
 
 #endif /* player_h */

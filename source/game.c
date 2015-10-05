@@ -46,6 +46,7 @@ void closeGame (Game* pGame)
     
     //liberando objetos do game
     destroyPlayer(pGame->player);
+    free(pGame->ground);
     free(pGame);
 }
 
@@ -53,6 +54,9 @@ void loadGameContext (Game* pGame)
 {
     //inicializando player
     pGame->player = createPlayer(300.0f, 220.0f);
+    
+    //inicializando chao
+    pGame->ground = createRectangle(0, 440, 640, 40);
 }
 
 void handleEvents (Game* pGame)
@@ -64,6 +68,18 @@ void handleEvents (Game* pGame)
         switch (event.type) {
             case SDL_QUIT:
                 pGame->isRunning = false;
+                break;
+            
+            case SDL_KEYDOWN:
+                switch (event.key.keysym.sym)
+                {
+                    case SDLK_UP:
+                        pGame->player->m_rect.y -= 150.0f;
+                        break;
+                        
+                    default:
+                        break;
+                }
                 break;
                 
             default:
@@ -81,15 +97,6 @@ void handleEvents (Game* pGame)
     {
         if (pGame->player->m_dx > -200.0f)
             pGame->player->m_dx -= 20.0f;
-    }if (keys[SDL_SCANCODE_DOWN])
-    {
-        if (pGame->player->m_dy < 200.0f)
-            pGame->player->m_dy += 20.0f;
-    }
-    if (keys[SDL_SCANCODE_UP])
-    {
-        if (pGame->player->m_dy > -200.0f)
-            pGame->player->m_dy -= 20.0f;
     }
 }
 
@@ -103,8 +110,8 @@ void updateGame (Game* pGame)
     deltaTime = (float) (thisTime - lastTime) / 1000;
     lastTime = thisTime;
     
-    pGame->player->m_x += pGame->player->m_dx * deltaTime;
-    pGame->player->m_y += pGame->player->m_dy * deltaTime;
+    pGame->player->m_rect.x += pGame->player->m_dx * deltaTime;
+    pGame->player->m_rect.y += pGame->player->m_dy * deltaTime;
     
     if (pGame->player->m_dx > 0.0f)
     {
@@ -115,16 +122,24 @@ void updateGame (Game* pGame)
         pGame->player->m_dx += 5.0f;
     }
     
-    if (pGame->player->m_dy > 0.0f)
-    {
-        pGame->player->m_dy -= 5.0f;
-    }
-    if (pGame->player->m_dy < 0.0f)
+    if (!pGame->player->isOnGround)
     {
         pGame->player->m_dy += 5.0f;
     }
+    else
+    {
+       pGame->player->m_dy = 0;
+    }
     
-    printf("%d\n", (int) (1 / deltaTime));
+    //colisao player e chao
+    if (checkBoxCollision(&pGame->player->m_rect, pGame->ground))
+    {
+        pGame->player->isOnGround = true;
+    }
+    else
+    {
+        pGame->player->isOnGround = false;
+    }
 }
 
 void renderGame (Game* pGame)
@@ -134,21 +149,29 @@ void renderGame (Game* pGame)
     
     //desenhando player
     SDL_SetRenderDrawColor(pGame->m_renderer, 255, 255, 255, 255);
-    SDL_Rect Player = {pGame->player->m_x, pGame->player->m_y, pGame->player->m_width, pGame->player->m_height};
+    SDL_Rect Player = {pGame->player->m_rect.x, pGame->player->m_rect.y, pGame->player->m_rect.w, pGame->player->m_rect.h};
     SDL_RenderFillRect(pGame->m_renderer, &Player);
     
     //Desenhando chao
     SDL_SetRenderDrawColor(pGame->m_renderer, 0, 0, 0, 255);
-    SDL_Rect ground = {0, 440, 680, 40};
-    SDL_RenderFillRect(pGame->m_renderer, &ground);
-    
-    if (checkBoxCollision(&Player, &ground))
-        printf("Colidindo\n");
+    SDL_RenderFillRect(pGame->m_renderer, pGame->ground);
     
     SDL_RenderPresent(pGame->m_renderer);
 }
 
 Boolean checkBoxCollision (SDL_Rect* pRect1, SDL_Rect* pRect2)
 {
-    return false;
+    if (pRect2->x > pRect1->x + pRect1->w)
+        return false;
+        
+    if (pRect2->x + pRect2->w < pRect1->x)
+        return false;
+    
+    if (pRect2->y > pRect1->y + pRect1->h)
+        return false;
+    
+    if (pRect2->y + pRect2->h < pRect1->y)
+        return false;
+    
+    return true;
 }

@@ -26,6 +26,9 @@ typedef struct game
     
     Player* player;
     
+    //chao
+    SDL_Rect* ground;
+    
 } Game;
 
 Game* initGame (void);
